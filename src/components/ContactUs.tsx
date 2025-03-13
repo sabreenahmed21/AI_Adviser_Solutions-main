@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ export default function ContactUs() {
     formState: { errors },
     reset,
     setValue,
+    watch
   } = useForm<FormData>();
 
   const sendEmail: SubmitHandler<FormData> = async (data) => {
@@ -36,7 +37,6 @@ export default function ContactUs() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      console.log(response);
       if (response.ok) {
         toast.success("Your message was sent successfully!");
         reset();
@@ -44,13 +44,16 @@ export default function ContactUs() {
         toast.error("Your message wasn't sent successfully.");
       }
     } catch (error) {
-      console.error(error);
       toast.error("Your message wasn't sent successfully.");
     } finally {
       setLoading(false);
     }
   };
-
+  
+  useEffect(() => {
+    register("phone", { required: "Phone Number is required" });
+  }, [register]);
+  
   return (
     <div
       className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start pt-20"
@@ -79,16 +82,6 @@ export default function ContactUs() {
               <p className="text-secondary-gray">Egypt, UAE, and KSA</p>
             </div>
           </div>
-
-          {/* <div className="flex items-center p-4 rounded-lg bg-primary-light">
-            <div className="bg-primary p-3 rounded-full text-white mr-4">
-              <FaPhoneAlt className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-medium text-neutral-dark">Phone Number</h3>
-              <p className="text-secondary-gray">+02 01000000000</p>
-            </div>
-          </div> */}
 
           <div className="flex items-center p-4 rounded-lg bg-primary-light">
             <div className="bg-primary p-3 rounded-full text-white mr-4">
@@ -172,11 +165,16 @@ export default function ContactUs() {
             inputStyle={{ width: "100%" }}
             buttonStyle={{ borderRadius: "0.375rem 0 0 0.375rem" }}
             placeholder="Enter phone number"
+            value={watch("phone")}
             onChange={(value) =>
               setValue("phone", value, { shouldValidate: true })
             }
-            specialLabel=""
           />
+          {errors.phone && (
+            <p className="text-red-600  text-sm">
+              {errors.phone.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
